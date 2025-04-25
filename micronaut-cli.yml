@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: dev.tsvinc
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [ app-name, data, data-jpa, http-client-test, java, java-application, jdbc-hikari, jul-to-slf4j, junit, lombok, maven, maven-enforcer-plugin, micronaut-aot, micronaut-http-validation, netty-server, postgres, properties, readme, serialization-jackson, shade, slf4j-simple-logger, static-resources, testcontainers ]

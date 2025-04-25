@@ -1,0 +1,36 @@
+datasources:
+  default:
+    url: jdbc:tc:postgresql:16:///postgres
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+    maximumPoolSize: 5
+    minimumIdle: 1
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: none
+# TestContainers configuration
+#testcontainers:
+# Specify registry location for containers
+#  registry-url: your-private-registry.example.com
+  # Configure Ryuk container
+#  ryuk:
+#    image-name: your-private-registry.example.com/testcontainers/ryuk:0.3.3
+
+  # Configure PostgreSQL container
+#  postgresql:
+#    image-name: your-private-registry.example.com/library/postgres:16-alpine
+
+  # Optional: Docker authentication if needed
+#  docker:
+#    auth:
+#      username: ${DOCKER_USERNAME}
+#      password: ${DOCKER_PASSWORD}
+
+  # Optional: Additional TestContainers configurations
+#  reuse:
+#    enabled: true

@@ -1,0 +1,20 @@
+micronaut:
+  application:
+    name: mn-testcontainers-shenanigans
+datasources:
+  default:
+    password: postgres
+    username: postgres
+    db-type: postgres
+    dialect: POSTGRES
+    url: jdbc:postgresql:localhost:5432/postgres
+    driver-class-name: org.postgresql.Driver
+jpa:
+  default:
+    properties:
+      hibernate.hbm2ddl.auto: none
+liquibase:
+  datasources:
+    default:
+      change-log: 'classpath:db/changelog/db.changelog-master.yaml'
+      enabled: true
