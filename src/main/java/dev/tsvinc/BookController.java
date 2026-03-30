@@ -1,14 +1,14 @@
 package dev.tsvinc;
 
+import java.net.URI;
+import java.util.Optional;
+
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
 import jakarta.inject.Inject;
-
-import java.net.URI;
-import java.util.Optional;
 
 @Controller("/books")
 public class BookController {
