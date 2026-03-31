@@ -1,6 +1,7 @@
 package dev.tsvinc;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
+
 import io.micronaut.runtime.Micronaut;
 
 public class Application {

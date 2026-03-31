@@ -1,5 +1,15 @@
 package dev.tsvinc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.stream.StreamSupport;
+
+import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
@@ -9,15 +19,6 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import net.datafaker.Faker;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.stream.StreamSupport;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest(environments = "test")
 @Testcontainers
@@ -29,7 +30,6 @@ public class BookControllerTest {
     public static void setup() {
         RegistryAuthLocator.instance().addAuthentication("your-private-registry.example.com", "username", "password");
     }*/
-
 
     @Inject
     @Client("/")
@@ -73,7 +73,7 @@ public class BookControllerTest {
 
     @Test
     void testListBooks() {
-                var title = faker.book().title();
+        var title = faker.book().title();
         var isbn = faker.code().isbn13();
         var book1 = new Book(title, isbn);
         client.toBlocking().exchange(HttpRequest.POST("/books", book1));
@@ -84,8 +84,7 @@ public class BookControllerTest {
         client.toBlocking().exchange(HttpRequest.POST("/books", book2));
 
         HttpRequest<Iterable<Book>> listRequest = HttpRequest.GET("/books");
-        Iterable<Book> books =
-                client.toBlocking().retrieve(listRequest, Argument.listOf(Book.class));
+        Iterable<Book> books = client.toBlocking().retrieve(listRequest, Argument.listOf(Book.class));
 
         assertNotNull(books);
         var count = StreamSupport.stream(books.spliterator(), false).count();
