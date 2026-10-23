@@ -33,6 +33,9 @@ Native builds need GraalVM for JDK 25 as `JAVA_HOME` and take ~7 min of image co
   `-Dpackaging=native-image`) runs the JVM tests with the GraalVM tracing agent and passes
   `target/native/agent-output/test` to `native-image`. Never build native with `-DskipTests`, and when adding code paths
   that use new library features, make sure a test exercises them — otherwise the native binary fails at runtime.
+- The agent runs in `direct` mode (writes straight into `agent-output/test`). Don't switch back to the default mode:
+  it writes per-session dirs that `native:merge-agent-files` merges only on its first execution per build, which is
+  before surefire — so a single clean `package` (as in CI) would compile the image without any test metadata.
 - The upstream GraalVM metadata repository doesn't match our versions (e.g. Liquibase 4.33 falls back to 5.0.1
   metadata); relying on it alone produced wrong Liquibase changeset checksums in native.
 - `jpa.default.compile-time-hibernate-proxies: true` is required: runtime ByteBuddy proxies don't work in native.

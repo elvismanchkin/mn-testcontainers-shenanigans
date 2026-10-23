@@ -302,6 +302,12 @@
                         <configuration>
                             <agent>
                                 <enabled>true</enabled>
+                                <!-- "direct" writes straight to agent-output/test; the default mode writes per-session
+                                     dirs that the plugin merges only once per build, before the tests have run -->
+                                <defaultMode>direct</defaultMode>
+                                <modes>
+                                    <direct>config-output-dir=${project.build.directory}/native/agent-output/test</direct>
+                                </modes>
                             </agent>
                             <buildArgs combine.children="append">
                                 <buildArg>-H:ConfigurationFileDirectories=${project.build.directory}/native/agent-output/test</buildArg>
