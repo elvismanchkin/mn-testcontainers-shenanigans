@@ -12,8 +12,8 @@ This service provides endpoints to manage books with the following capabilities:
 
 ## Technologies Used
 
-- **Java 21**: Modern Java version with the latest features
-- **Micronaut 4.7.6**: Fast, lightweight microservices framework
+- **Java 25**: Latest LTS Java release
+- **Micronaut 4.10**: Fast, lightweight microservices framework
 - **PostgreSQL**: Relational database for persistence
 - **Hibernate/JPA**: For data persistence and object-relational mapping
 - **Liquibase**: For database schema management and versioning
@@ -22,6 +22,8 @@ This service provides endpoints to manage books with the following capabilities:
 - **Jakarta EE**: For standardized enterprise APIs
 - **JUnit 5**: For unit and integration testing
 - **DataFaker**: For generating test data
+- **Micronaut AOT**: Build-time optimizations for faster startup
+- **GraalVM Native Image**: Ahead-of-time compilation to a native executable
 
 ## API Endpoints
 
@@ -34,7 +36,7 @@ This service provides endpoints to manage books with the following capabilities:
 
 ### Prerequisites
 
-- Java 21 or higher
+- Java 25 (GraalVM for JDK 25 to build native executables)
 - Maven
 - Docker (for running tests with TestContainers)
 - PostgreSQL (for local development)
@@ -45,11 +47,34 @@ This service provides endpoints to manage books with the following capabilities:
 2. Configure your PostgreSQL connection in `application.yml` if needed
 3. Run the application:
 
-## Micronaut 4.8.2 Documentation
+```bash
+./mvnw mn:run
+```
 
-- [User Guide](https://docs.micronaut.io/4.8.2/guide/index.html)
-- [API Reference](https://docs.micronaut.io/4.8.2/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/4.8.2/guide/configurationreference.html)
+### Building
+
+```bash
+# Runnable (shaded) JAR with Micronaut AOT optimizations, runs tests
+./mvnw verify
+java -jar target/mn-testcontainers-shenanigans-0.1.jar
+
+# GraalVM native executable (requires GraalVM for JDK 25)
+./mvnw package -Dpackaging=native-image
+./target/mn-testcontainers-shenanigans
+```
+
+AOT optimizations are configured in `aot-jar.properties` (JVM) and `aot-native-image.properties` (native).
+
+### Continuous Integration
+
+GitHub Actions (`.github/workflows/ci.yml`) builds and tests the app on JDK 25 with AOT,
+then compiles a GraalVM native executable and smoke-tests it against PostgreSQL.
+
+## Micronaut 4.10 Documentation
+
+- [User Guide](https://docs.micronaut.io/4.10.x/guide/index.html)
+- [API Reference](https://docs.micronaut.io/4.10.x/api/index.html)
+- [Configuration Reference](https://docs.micronaut.io/4.10.x/guide/configurationreference.html)
 - [Micronaut Guides](https://guides.micronaut.io/index.html)
 
 ---

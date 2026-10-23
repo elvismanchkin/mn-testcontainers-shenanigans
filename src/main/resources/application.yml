@@ -7,10 +7,12 @@ datasources:
     username: postgres
     db-type: postgres
     dialect: POSTGRES
-    url: jdbc:postgresql:localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/postgres
     driver-class-name: org.postgresql.Driver
 jpa:
   default:
+    # Use Micronaut's build-time proxies instead of runtime ByteBuddy, which is not available in GraalVM native images
+    compile-time-hibernate-proxies: true
     properties:
       hibernate.hbm2ddl.auto: none
 liquibase:
