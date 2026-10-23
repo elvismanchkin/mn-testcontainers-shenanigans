@@ -58,7 +58,9 @@ This service provides endpoints to manage books with the following capabilities:
 ./mvnw verify
 java -jar target/mn-testcontainers-shenanigans-0.1.jar
 
-# GraalVM native executable (requires GraalVM for JDK 25)
+# GraalVM native executable (requires GraalVM for JDK 25 and Docker).
+# Tests run on the JVM with the GraalVM tracing agent to collect reachability metadata
+# for third-party libraries, so don't pass -DskipTests here.
 ./mvnw package -Dpackaging=native-image
 ./target/mn-testcontainers-shenanigans
 ```

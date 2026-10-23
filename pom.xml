@@ -19,6 +19,8 @@
         <micronaut.version>4.10.22</micronaut.version>
         <micronaut.runtime>netty</micronaut.runtime>
         <micronaut.aot.enabled>true</micronaut.aot.enabled>
+        <!-- 1.21.4+ is required for Docker Engine 29 (minimum API 1.40) -->
+        <testcontainers.version>1.21.4</testcontainers.version>
         <micronaut.aot.packageName>dev.tsvinc.aot.generated</micronaut.aot.packageName>
         <exec.mainClass>dev.tsvinc.Application</exec.mainClass>
     </properties>
@@ -279,5 +281,36 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <!-- Native builds run the JVM test suite with the GraalVM tracing agent and feed the recorded
+                 reachability metadata for third-party libraries (Liquibase, Hibernate, ...) into native-image.
+                 Tests must not be skipped, otherwise there is no agent output. -->
+            <id>native-agent</id>
+            <activation>
+                <property>
+                    <name>packaging</name>
+                    <value>native-image</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <configuration>
+                            <agent>
+                                <enabled>true</enabled>
+                            </agent>
+                            <buildArgs combine.children="append">
+                                <buildArg>-H:ConfigurationFileDirectories=${project.build.directory}/native/agent-output/test</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

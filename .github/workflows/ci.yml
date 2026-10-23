@@ -51,8 +51,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
+      # Tests run on the JVM with the GraalVM tracing agent; the recorded metadata is fed into native-image
       - name: Build native executable
-        run: ./mvnw -B -ntp package -Dpackaging=native-image -DskipTests
+        run: ./mvnw -B -ntp package -Dpackaging=native-image
 
       - name: Smoke test native executable
         run: |
