@@ -10,15 +10,17 @@
     <parent>
         <groupId>io.micronaut.platform</groupId>
         <artifactId>micronaut-parent</artifactId>
-        <version>4.7.6</version>
+        <version>4.10.22</version>
     </parent>
     <properties>
         <packaging>jar</packaging>
-        <jdk.version>21</jdk.version>
-        <release.version>21</release.version>
-        <micronaut.version>4.7.6</micronaut.version>
+        <jdk.version>25</jdk.version>
+        <release.version>25</release.version>
+        <micronaut.version>4.10.22</micronaut.version>
         <micronaut.runtime>netty</micronaut.runtime>
-        <micronaut.aot.enabled>false</micronaut.aot.enabled>
+        <micronaut.aot.enabled>true</micronaut.aot.enabled>
+        <!-- 1.21.4+ is required for Docker Engine 29 (minimum API 1.40) -->
+        <testcontainers.version>1.21.4</testcontainers.version>
         <micronaut.aot.packageName>dev.tsvinc.aot.generated</micronaut.aot.packageName>
         <exec.mainClass>dev.tsvinc.Application</exec.mainClass>
     </properties>
@@ -124,6 +126,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.datafaker</groupId>
@@ -205,7 +208,7 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.10.4</version>
                 <executions>
                     <execution>
                         <id>spotless-check</id>
@@ -278,5 +281,42 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <!-- Native builds run the JVM test suite with the GraalVM tracing agent and feed the recorded
+                 reachability metadata for third-party libraries (Liquibase, Hibernate, ...) into native-image.
+                 Tests must not be skipped, otherwise there is no agent output. -->
+            <id>native-agent</id>
+            <activation>
+                <property>
+                    <name>packaging</name>
+                    <value>native-image</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <configuration>
+                            <agent>
+                                <enabled>true</enabled>
+                                <!-- "direct" writes straight to agent-output/test; the default mode writes per-session
+                                     dirs that the plugin merges only once per build, before the tests have run -->
+                                <defaultMode>direct</defaultMode>
+                                <modes>
+                                    <direct>config-output-dir=${project.build.directory}/native/agent-output/test</direct>
+                                </modes>
+                            </agent>
+                            <buildArgs combine.children="append">
+                                <buildArg>-H:ConfigurationFileDirectories=${project.build.directory}/native/agent-output/test</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

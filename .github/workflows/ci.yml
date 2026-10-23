@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: JVM build & tests (AOT)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'maven'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build, test and run Micronaut AOT
+        run: ./mvnw -B -ntp verify
+
+      # Spotless runs `apply` during verify; fail if it had to reformat anything
+      - name: Check formatting
+        run: git diff --exit-code
+
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: surefire-reports
+          path: target/surefire-reports
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: app-jar
+          path: target/mn-testcontainers-shenanigans-*.jar
+          if-no-files-found: error
+
+  native:
+    name: GraalVM native image
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'maven'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      # Tests run on the JVM with the GraalVM tracing agent; the recorded metadata is fed into native-image
+      - name: Build native executable
+        run: ./mvnw -B -ntp package -Dpackaging=native-image
+
+      - name: Smoke test native executable
+        run: |
+          docker run -d --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16
+          until docker exec pg pg_isready -U postgres; do sleep 1; done
+          ./target/mn-testcontainers-shenanigans &
+          for i in $(seq 1 30); do curl -sf localhost:8080/books && break; sleep 1; done
+          curl -sf -X POST -H 'Content-Type: application/json' -d '{"title":"Native","isbn":"123"}' localhost:8080/books
+          curl -sf localhost:8080/books/isbn/123 | grep -q Native
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: native-executable
+          path: target/mn-testcontainers-shenanigans
+          if-no-files-found: error
